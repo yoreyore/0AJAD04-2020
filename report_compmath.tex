@@ -1,0 +1,35 @@
+\documentclass[dvipdfmx]{jsarticle}
+\usepackage{amsmath, amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{tikz}
+\usepackage{txfonts}
+
+\title{計算機数学 レポート (CA-1)}
+\author{202020114 伊藤綾音}
+
+\begin{document}
+\maketitle
+
+\noindent
+課題1.\\
+(補題3-41)\\
+(1) フェルマーの小定理より $(a^{\frac{q}{p}})^{p} = a^{q} = a$ が成り立つため, これを $\frac{1}{p}$ 乗すれば得られる. \\
+(2) 左辺を展開すると, $\displaystyle (a+b)^{p^{j}} = \sum_{i=0}^{p^{j}} \begin{pmatrix} p^{j} \\ i \end{pmatrix} a^{p^{j}-i}b^{i}$. 
+右辺の初項と最終項以外の係数は $p$ の倍数であるため, $(a+b)^{p^{j}} = a^{p^{j}} + b^{p^{j}}$.
+(定理3-42)\\
+(十分性)\\
+$f(x) = g(x)^{p}$ より $f^{\prime}(x) = p \cdot g(x)^{\prime} \cdot g(x)^{p-1} = 0$.
+(必要性)\\
+$f^{\prime}(x) = 0$ より, $f(x)$ の非ゼロの項の $x$ の指数は $p$ の倍数である. よって $^{\exists}k \in \mathbb{Z}_{>0}$ s.t. $\displaystyle f(x) = \sum_{i=0}^{k} a_{ip}x^{ip}$. 
+ここで, $\displaystyle g(x) = \sum_{i=0}^{k} g_{i}x^{i}$, ただし $g_{i} = a_{ip}^{\frac{1}{p}} = a_{ip}^{p^{l-1}} \ (i = 0, \ldots, k)$ とすれば, 補題3-41より
+\begin{eqnarray}
+g(x)^{p} & = & \sum_{i=0}^{k} g_{i}^{p}x^{ip} \nonumber \\
+         & = & \sum_{i=0}^{k} a_{ip}x^{ip} \nonumber \\
+         & = & f(x). \nonumber
+\end{eqnarray}
+
+\noindent
+課題2.
+\end{document}
