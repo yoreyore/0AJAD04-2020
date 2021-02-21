@@ -27,148 +27,151 @@ for (I = 1; I < M - 1; I++) {
  B1 = append(B1, [coeflist(G[I+1])]);
 }
 */
-
-/* algorithm 5-1 matrix ver.*/
-Q = 3$
-setmod_ff(Q)$
-F = x^5 + 2*x^4 + x^3 + 2*x^2 + 2$
-M = deg(F, x)$
-
 def coefvect(G, U, B, M) {
- D = deg(G[U][0], x)$
- if (D == 0) {
-  B[U][0] = G[U][0]$
- } else {
-  for (I = 0; I <= D; I++) B[U][I] = coef(G[U][0], I, x)$
- }
- return B$
-}
-
-G = matrix(M,1)$
-B = matrix(M,M)$
-
-G[0][0] = 1$
-B = coefvect(G, 0, B, M)$
-
-G[1][0] = simp_ff(srem(x^Q, F))$
-B = coefvect(G, 1, B, M)$
-
-for (I = 1; I < M - 1; I++) {
- G[I+1][0] = simp_ff(srem(umul(G[I][0], G[1][0]), F))$
- B = coefvect(G, (I+1), B, M)$
-}
-
-/* algorithm 5-2 */
-for (I = 0; I < M; I++) {
- B[I][I] = B[I][I] - 1$
-}
-
-for (I = 0; I < M - 1; I++) {
- FLAG = true;
- for (J = I; J < M; J++) {
-  if (B[I][J] != 0) {
-   FLAG = false$
-   for (L = 0; L < M; L++) {
-    TMP = B[L][J]$
-    B[L][J] = B[L][I]$
-    B[L][I] = TMP$
-   }
-  }
-  if (FLAG == false) break$
- }
- if (FLAG == true) continue$
-
- R = (1 / B[I][I])$
- for (J = 0; J < M; J++) {
-  B[J][I] = R * B[J][I]$
- }
-
- for (J = 0; J < M; J++) {
-  if (J == I) continue$
-  TMP = B[I][J];
-  for (L = 0; L < M; L++) {
-   B[L][J] = B[L][J] - TMP * B[L][I]$
-  }
- }
-}
-
-for (I = 0; I < M; I++) {
- for (J = 0; J < M; J++) {
-  if (J == I) {
-   B[I][J] = 1 - B[I][J]$
+  D = deg(G[U][0], x)$
+  if (D == 0) {
+   B[U][0] = G[U][0]$
   } else {
-   B[I][J] = (-1) * B[I][J]$
+   for (I = 0; I <= D; I++) B[U][I] = coef(G[U][0], I, x)$
   }
+  return B$
  }
-}
 
-FC = []$
+def berlekamp(Q, F){
+ /* algorithm 5-1 matrix ver.*/
+ // Q = 3$
+ setmod_ff(Q)$
+ // F = x^5 + 2*x^4 + x^3 + 2*x^2 + 2$
+ M = deg(F, x)$
 
-for (I = 0; I < M; I++) {
- P = 0$
- FLAG = true$
- for (J = 0; J < M; J++) {
-  if (B[I][J] != 0) {
-   FLAG = false$
-   P = P + B[I][J] * x^J$
+ G = matrix(M,1)$
+ B = matrix(M,M)$
+
+ G[0][0] = 1$
+ B = coefvect(G, 0, B, M)$
+
+ G[1][0] = simp_ff(srem(x^Q, F))$
+ B = coefvect(G, 1, B, M)$
+
+ for (I = 1; I < M - 1; I++) {
+  G[I+1][0] = simp_ff(srem(umul(G[I][0], G[1][0]), F))$
+  B = coefvect(G, (I+1), B, M)$
+ }
+
+ /* algorithm 5-2 */
+ for (I = 0; I < M; I++) {
+  B[I][I] = B[I][I] - 1$
+ }
+
+ for (I = 0; I < M - 1; I++) {
+  FLAG = true;
+  for (J = I; J < M; J++) {
+   if (B[I][J] != 0) {
+    FLAG = false$
+    for (L = 0; L < M; L++) {
+     TMP = B[L][J]$
+     B[L][J] = B[L][I]$
+     B[L][I] = TMP$
+    }
+   }
+   if (FLAG == false) break$
   }
- }
- if (FLAG == true) continue$
- FC = append(FC, [P])$
-}
+  if (FLAG == true) continue$
 
-/* algorithm 5-3 */
-ANS = []$
-K = length(FC)$
+  R = (1 / B[I][I])$
+  for (J = 0; J < M; J++) {
+   B[J][I] = R * B[J][I]$
+  }
 
-if (K == 1) {
- ANS = append(ANS, [F])$
-} else {
- FL = [F]$
-}
-for (I = 2; I < K + 1; I++) {
- FP = []$
- FT = []$
- PRD = 1$
-
- for (J = 0; J < length(FL); J++) {
-  for (ALPHA = 0; ALPHA < Q; ALPHA++) {
-   GCD = gcd(car(FL), FC[I-1] - ALPHA, Q)$
-   if (deg(GCD, x) != 0) {
-    FT = append(FT, [GCD])$
-    PRD = PRD * GCD$
+  for (J = 0; J < M; J++) {
+   if (J == I) continue$
+   TMP = B[I][J];
+   for (L = 0; L < M; L++) {
+    B[L][J] = B[L][J] - TMP * B[L][I]$
    }
   }
-  FL = append(cdr(FL), [sdiv(car(FL), PRD)])$
-  if (deg(car(reverse(FL)), x) > 0) FT = append(FT, [(car(reverse(FL)))])$
+ }
 
-  for (V = 0; V < length(FT); V++) {
-   FLAG = true$
-   for (W = 0; W < length(FP); W++) {
-    if (FT[V] == FP[W]) FLAG = false$
+ for (I = 0; I < M; I++) {
+  for (J = 0; J < M; J++) {
+   if (J == I) {
+    B[I][J] = 1 - B[I][J]$
+   } else {
+    B[I][J] = (-1) * B[I][J]$
    }
-   if (FLAG == true) FP = append(FP, [FT[V]])$
   }
  }
- if (length(FP) == K) {
-  ANS = append(ANS, FP)$
-  break$  
+
+ FC = []$
+
+ for (I = 0; I < M; I++) {
+  P = 0$
+  FLAG = true$
+  for (J = 0; J < M; J++) {
+   if (B[I][J] != 0) {
+    FLAG = false$
+    P = P + B[I][J] * x^J$
+   }
+  }
+  if (FLAG == true) continue$
+  FC = append(FC, [P])$
  }
- FL = FP$
+
+ /* algorithm 5-3 */
+ ANS = []$
+ K = length(FC)$
+
+ if (K == 1) {
+  ANS = append(ANS, [F])$
+ } else {
+  FL = [F]$
+ }
+ for (I = 2; I < K + 1; I++) {
+  FP = []$
+  FT = []$
+  PRD = 1$
+
+  for (J = 0; J < length(FL); J++) {
+   for (ALPHA = 0; ALPHA < Q; ALPHA++) {
+    GCD = gcd(car(FL), FC[I-1] - ALPHA, Q)$
+    if (deg(GCD, x) != 0) {
+     FT = append(FT, [GCD])$
+     PRD = PRD * GCD$
+    }
+   }
+   FL = append(cdr(FL), [sdiv(car(FL), PRD)])$
+   if (deg(car(reverse(FL)), x) > 0) FT = append(FT, [(car(reverse(FL)))])$
+
+   for (V = 0; V < length(FT); V++) {
+    FLAG = true$
+    for (W = 0; W < length(FP); W++) {
+     if (FT[V] == FP[W]) FLAG = false$
+    }
+    if (FLAG == true) FP = append(FP, [FT[V]])$
+   }
+  }
+  if (length(FP) == K) {
+   ANS = append(ANS, FP)$
+   break$  
+  }
+  FL = FP$
+ }
+
+ for (I = 0; I < length(ANS); I++) {
+  CAR = car(ANS)$
+  C = coef(CAR, deg(CAR, x), x)$
+  INV = 1$
+  
+  if (C == 1) continue$
+  for (J = 1; J < Q; J++) {
+   if (J * C == 1) INV = J$
+  }
+  CAR = tdiv(CAR, INV)$ 
+  ANS = append(cdr(ANS), [CAR])$
+ }
+
+ print(ANS)$
 }
 
-for (I = 0; I < length(ANS); I++) {
- CAR = car(ANS)$
- C = coef(CAR, deg(CAR, x), x)$
- INV = 1$
- 
- if (C == 1) continue$
- for (J = 1; J < Q; J++) {
-  if (J * C == 1) INV = J$
- }
- CAR = tdiv(CAR, INV)$ 
- ANS = append(cdr(ANS), [CAR])$
-}
-
-print(ANS)$
+berlekamp(3, (x^5 + 2*x^4 + x^3 + 2*x^2 + 2))$
 end$
